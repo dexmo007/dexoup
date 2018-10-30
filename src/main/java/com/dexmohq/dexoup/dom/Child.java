@@ -9,5 +9,9 @@ import java.io.IOException;
  */
 public interface Child {
 
+    Element getParent();
+
+    void setParent(Element parent);
+
     void writeTo(IndentableWriter writer) throws IOException;
 }

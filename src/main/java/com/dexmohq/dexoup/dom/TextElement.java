@@ -1,17 +1,21 @@
 package com.dexmohq.dexoup.dom;
 
 import com.dexmohq.dexoup.writer.IndentableWriter;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.io.IOException;
 
 /**
  * @author Henrik Drefs
  */
-@Value
+@Data
+@AllArgsConstructor
 public class TextElement implements Child {
 
-    String text;
+    private String text;
+
+    private Element parent;
 
     @Override
     public String toString() {

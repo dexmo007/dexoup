@@ -1,5 +1,7 @@
 package com.dexmohq.dexoup.reader;
 
+import com.dexmohq.dexoup.reader.exception.UnexpectedEndOfFileException;
+
 import java.io.IOException;
 import java.util.function.Predicate;
 
@@ -14,9 +16,9 @@ public abstract class AbstractReader implements Reader {
     }
 
     @Override
-    public void checkNotEOF() {
+    public void checkNotEOF() throws UnexpectedEndOfFileException {
         if (isEOF()) {
-            throw new IllegalStateException("unexpected EOF");
+            throw new UnexpectedEndOfFileException();
         }
     }
 

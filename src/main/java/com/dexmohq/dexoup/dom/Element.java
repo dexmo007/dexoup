@@ -23,6 +23,7 @@ public class Element implements Child {
     @Getter
     private final String name;
 
+    @Getter
     private Map<String, String> attributes = new HashMap<>();
 
     @Getter
@@ -77,17 +78,5 @@ public class Element implements Child {
             // cannot happen with in memory StringWriter
         }
         return sw.toString();
-    }
-
-    public static void main(String[] args) {
-        final Element div = new Element("div")
-                .putAttribute("class", "container")
-                .addChild(new Element("ul")
-                        .addChild(new Element("li"))
-                        .addChild(new Element("li"))
-                        .addChild(new Element("li"))
-                );
-        System.out.println(div);
-
     }
 }

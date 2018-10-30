@@ -1,5 +1,8 @@
 package com.dexmohq.dexoup.reader;
 
+import com.dexmohq.dexoup.reader.exception.UnexpectedEndOfFileException;
+import com.dexmohq.dexoup.reader.exception.UnexpectedTokenException;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +16,7 @@ public class AttributeReader extends AbstractDomReader {
         super(r);
     }
 
-    public Map<String, String> read() throws IOException {
+    public Map<String, String> read() throws IOException, UnexpectedEndOfFileException, UnexpectedTokenException {
         final HashMap<String, String> attrs = new HashMap<>();
         while (r.hasMore()) {
             if (Character.isWhitespace(r.current())) {
@@ -21,8 +24,10 @@ public class AttributeReader extends AbstractDomReader {
                 continue;
             }
             final String name = readName();
+            r.squeeze();
             if (r.hasMore() && r.current() == '=') {
                 r.advance();
+                r.squeeze();
                 r.checkNotEOF();
                 if (r.current() == '\"') {
                     r.advance();

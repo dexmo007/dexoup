@@ -3,6 +3,10 @@ package com.dexmohq.dexoup.reader;
 import com.dexmohq.dexoup.dom.Document;
 import com.dexmohq.dexoup.dom.Element;
 import com.dexmohq.dexoup.dom.TextElement;
+import com.dexmohq.dexoup.reader.exception.ParseException;
+import com.dexmohq.dexoup.reader.exception.UnclosedTagException;
+import com.dexmohq.dexoup.reader.exception.UnexpectedEndOfFileException;
+import com.dexmohq.dexoup.reader.exception.UnexpectedTokenException;
 
 import java.io.IOException;
 import java.util.Deque;
@@ -23,7 +27,7 @@ public class DocumentReader extends AbstractDomReader {
         super(reader);
     }
 
-    private void handleOpeningTag() throws IOException {
+    private void handleOpeningTag() throws IOException, UnexpectedTokenException, UnexpectedEndOfFileException {
         final String elementName = readName();
         tags.push(elementName);
         r.squeeze();
@@ -55,24 +59,25 @@ public class DocumentReader extends AbstractDomReader {
         }
     }
 
-    private void handleClosingTag() throws IOException {
+    private void handleClosingTag() throws IOException, UnexpectedTokenException, UnexpectedEndOfFileException {
         final String en = readName();
         if (!currentElement.getName().equals(en)) {
             throw new IllegalStateException("unexpected closing tag");
         }
+        r.squeeze();
         r.checkNotEOF();
         if (r.current() != '>') {
             throw new UnexpectedTokenException(r.current(), r.position());
         }
         r.advance();
         if (tags.isEmpty()) {
-            throw new IllegalStateException("closing unopened tag");
+            throw new UnexpectedTokenException("closing unopened tag", r.current(), r.position());
         }
         tags.pop();
         currentElement = currentElement.getParent();
     }
 
-    public synchronized Document parse() throws IOException {
+    public synchronized Document parse() throws IOException, ParseException {
 
         while (r.hasMore()) {
             if (Character.isWhitespace(r.current())) {
@@ -94,36 +99,15 @@ public class DocumentReader extends AbstractDomReader {
 
             } else {
                 final String text = r.consumeUntil('<');
-                currentElement.addChild(new TextElement(text));
+                currentElement.addChild(new TextElement(text, currentElement));
             }
         }
 
         if (tags.isEmpty()) {
+            rootElement.getChildren().forEach(c -> c.setParent(null));
             return new Document(rootElement.getChildren());
         }
-        throw new IllegalStateException("unclosed tag");
+        throw new UnclosedTagException(tags.peek());
     }
-
-    public static void main(String[] args) throws IOException {
-
-//        System.out.println(new AttributeReader("class=\"container d-flex\" aria=\"hidden\"").read());
-//
-        System.out.println(new DocumentReader(new StringReader("<div-custom class=\"container\">" +
-                "<void />" +
-                "some text" +
-                "<ul>" +
-                "<li>First</li>" +
-                "<li>Second</li>" +
-                "</ul>" +
-                "</div-custom>")).parse());
-    }
-
-    public static class UnexpectedTokenException extends RuntimeException {
-
-        public UnexpectedTokenException(char token, int pos) {
-            super(token + " at " + pos);
-        }
-    }
-
 
 }
