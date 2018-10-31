@@ -1,6 +1,7 @@
 package com.dexmohq.dexoup.reader;
 
 import com.dexmohq.dexoup.reader.exception.UnexpectedEndOfFileException;
+import com.dexmohq.dexoup.reader.exception.UnexpectedTokenException;
 
 import java.io.IOException;
 import java.util.function.Predicate;
@@ -26,4 +27,10 @@ public interface Reader {
     String consumeUntil(Predicate<Character> until) throws IOException;
 
     void squeeze() throws IOException;
+
+    void expect(char expected) throws UnexpectedEndOfFileException, UnexpectedTokenException;
+
+    void expectAndAdvance(char expected) throws IOException, UnexpectedEndOfFileException, UnexpectedTokenException;
+
+    void expectEOF() throws UnexpectedTokenException;
 }

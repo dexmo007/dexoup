@@ -1,6 +1,7 @@
 package com.dexmohq.dexoup.reader;
 
 import com.dexmohq.dexoup.reader.exception.UnexpectedEndOfFileException;
+import com.dexmohq.dexoup.reader.exception.UnexpectedTokenException;
 
 import java.io.IOException;
 import java.util.function.Predicate;
@@ -49,4 +50,24 @@ public abstract class AbstractReader implements Reader {
         }
     }
 
+    @Override
+    public void expect(char expected) throws UnexpectedEndOfFileException, UnexpectedTokenException {
+        checkNotEOF();
+        if (current() != expected) {
+            throw new UnexpectedTokenException("expected " + expected, current(), position());
+        }
+    }
+
+    @Override
+    public void expectAndAdvance(char expected) throws IOException, UnexpectedEndOfFileException, UnexpectedTokenException {
+        expect(expected);
+        advance();
+    }
+
+    @Override
+    public void expectEOF() throws UnexpectedTokenException {
+        if (!isEOF()) {
+            throw new UnexpectedTokenException("expected EOF", current(), position());
+        }
+    }
 }
